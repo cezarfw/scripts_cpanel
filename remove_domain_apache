@@ -1,0 +1,113 @@
+#!/bin/bash
+
+##################################################################
+# Author       : Cezar Augusto Roggia
+# Email        : cezarfw@gmail.com
+# Info         : 
+# Version      : 1.0
+# Project      : https://github.com/cezarfw
+##################################################################
+
+## BASHCSS
+verm='\E[0;31m'   # Red
+verd='\E[0;32m'   # Green
+amar='\E[0;33m'   # Yellow
+bold='\033[37;4;1m' #BOLD
+und='\033[37;4m'
+rese=$(tput sgr0) # No color.
+OK="${verd}[OK]${rese}";                                                                                                                                                                               
+ATT="${amar}[!]${rese}";                                                                                                                                                                               
+FAIL="${verm}[!]${rese}";
+
+VERSAO="1.0"
+#limpar tela
+#clear
+
+
+#echo -e "\n[!] - Bem vindo Gator.\n"
+#read -p "Informe o DOMINIO a ser REMOVIDO: "           DOMINIO
+#read -p "Informe o DOMINIO PRINCIPAL(owner) da conta: "                OWNER
+#echo -e "\n"
+
+
+dominio="$1"
+
+data_create=`cat /var/cpanel/accounting.log |grep $dominio |awk '{print $1,$2,$3,$4}'`
+
+echo -e "O domínio "$1" foi criado em "$data_create""
+echo -e "Tem certeza que deseja prosseguir com a remoção do domínio do servidor? (S/N)"
+read decision
+case decision in
+        S|s) ;;
+
+        N|n) echo "Finalizando script"; exit 0;
+
+
+
+# PESQUISA NOS ARQUIVOS A STRING CORREPONDENTE AO DOMÍNIO
+arquivos(){
+
+echo -e "Removendo o domínio dos arquivos, aguarde!"
+sleep 8
+
+arq_passwd='/etc/passwd'
+arq_userdomain='/etc/userdomains'
+arq_user='/var/cpanel/users/vivatir'
+arq_userdata='/var/cpanel/userdata/'
+arq_grupo='/etc/group'
+
+
+}
+
+
+
+
+
+# CHECA SE OS VALORES FORAM INSERIDOS CORREETAMENTE
+scripts(){
+if [[ -z $DOMINIO ]]
+then
+        echo -e "${FAIL} - Nenhum valor pode ficar em branco, por favor tente novamente."
+        exit
+else
+        #printf \n${OK} "- Execultando comando" ${rese}\n\n
+        printf "\n${OK} - Verificando o DOMINIO\n"
+        printf "\n${ATT} - Execultando comando\n"
+
+        /scripts/whoowns $DOMINIO\n
+        #echo $OWNER
+        /scripts/killdns $DOMINIO\n
+        /scripts/killvhost $DOMINIO\n
+        /scripts/cleandns $DOMINIO\n
+
+        sleep 3
+        printf "\n${OK} - Limpando cache do servidor\n"
+
+        /scripts/updateuserdomains;
+        /scripts/updateuserdatacache;
+        /scripts/update_db_cache;
+        sleep 2
+
+
+}
+                                                                                                                                                                                    43,1-8        60%
+#if [[! -z ]]
+#then
+        #echo -e "${FAIL} - Dominio Ainda consta nos arquivos. Removendo..."
+        #ui -d | egrep 'Addon: "dominio" |Sub: .teste.com.br'
+
+
+        #Apaga as linhas que contem o dominio informado na variável $DOMINIO
+        #sed -e "/linha/d" $DOMINIO
+
+        #find /etc/localdomains/$DOMINIO -type f -exec sed -i -e '/'$DOMINIO'/d' {} \;
+
+
+        #exit
+        ### Em desenvolvimento - FIM ###
+
+echo -e "Domínio >>> "${verd}$DOMINIO${rese}" <<< removido com SUCESSO!"        
+echo -e "Domínio >>> "${FAIL}$OWNER${rese}" <<< Verificando se o domínio foi removido o ADDONS!"
+        /root/bin/ui -d $OWNER
+
+fi
