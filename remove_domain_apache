@@ -15,9 +15,9 @@ amar='\E[0;33m'   # Yellow
 bold='\033[37;4;1m' #BOLD
 und='\033[37;4m'
 rese=$(tput sgr0) # No color.
-OK="${verd}[OK]${rese}";                                                                                                                                                                               
-ATT="${amar}[!]${rese}";                                                                                                                                                                               
-FAIL="${verm}[!]${rese}";
+OK="${verd}[OK]${rese}";                                                                                                                                                                                                                                                       
+ATT="${amar}[!]${rese}";                                                                                                                                                                                                                                                       
+FAIL="${verm}[!]${rese}"; 
 
 VERSAO="1.0"
 #limpar tela
@@ -25,27 +25,64 @@ VERSAO="1.0"
 
 
 #echo -e "\n[!] - Bem vindo Gator.\n"
-#read -p "Informe o DOMINIO a ser REMOVIDO: "           DOMINIO
-#read -p "Informe o DOMINIO PRINCIPAL(owner) da conta: "                OWNER
+#read -p "Informe o DOMINIO a ser REMOVIDO: "		DOMINIO
+#read -p "Informe o DOMINIO PRINCIPAL(owner) da conta: "		OWNER
 #echo -e "\n"
+DOMINIO="$1"
 
 
-dominio="$1"
+data_create=`cat /var/cpanel/accounting.log |grep $DOMINIO |awk '{print $1,$2,$3,$4}'`
 
-data_create=`cat /var/cpanel/accounting.log |grep $dominio |awk '{print $1,$2,$3,$4}'`
-
+if [ $# -lt 1 ]
+   then
+      echo -e "${FAIL} - Argumentos insuficientes, ex: <$0> <paramêtro>, por favor tente novamente."
+else
+        printf "\n${OK} - Verificando o DOMINIO\n"
 echo -e "O domínio "$1" foi criado em "$data_create""
-echo -e "Tem certeza que deseja prosseguir com a remoção do domínio do servidor? (S/N)"
-read decision
-case decision in
-        S|s) ;;
+        printf "\n${ATT} - Tem certeza que deseja prosseguir com a remoção do domínio do servidor? (S/N)\n"
+read decisao
+case decisao in 
+	S|s) limpeza  ;;
+	N|n) echo "Finalizando script"; exit 0;
 
-        N|n) echo "Finalizando script"; exit 0;
+limpeza() {
+        /scripts/whoowns $DOMINIO\n
+        /scripts/killdns $DOMINIO\n
+        /scripts/killvhost $DOMINIO\n
+        /scripts/cleandns $DOMINIO\n
+
+        sleep 3
+        printf "\n${OK} - Limpando cache do servidor\n"
+
+        /scripts/updateuserdomains;
+        /scripts/updateuserdatacache;
+        /scripts/update_db_cache;
+        sleep 2 
+
+
+}
+
+
+
+echo -e "Limpando os arquivos"
+          
+for $(find /etc/passwd)
+ if [ -eq $DOMINIO ]
+	  then
+                  
+
+sed -i '/$DOMINIO/d' /etc/passwd
+        arq_userdomain='/etc/userdomains'
+        arq_user='/var/cpanel/users/vivatir'
+        arq_userdata='/var/cpanel/userdata/'
+        arq_grupo='/etc/group'
+
 
 
 
 # PESQUISA NOS ARQUIVOS A STRING CORREPONDENTE AO DOMÍNIO
 arquivos(){
+
 
 echo -e "Removendo o domínio dos arquivos, aguarde!"
 sleep 8
@@ -67,47 +104,54 @@ arq_grupo='/etc/group'
 scripts(){
 if [[ -z $DOMINIO ]]
 then
-        echo -e "${FAIL} - Nenhum valor pode ficar em branco, por favor tente novamente."
-        exit
+       	echo -e "${FAIL} - Nenhum valor pode ficar em branco, por favor tente novamente."
+	exit
 else
-        #printf \n${OK} "- Execultando comando" ${rese}\n\n
-        printf "\n${OK} - Verificando o DOMINIO\n"
-        printf "\n${ATT} - Execultando comando\n"
+	#printf \n${OK} "- Executando comando" ${rese}\n\n
+	printf "\n${OK} - Verificando o DOMINIO\n"
+	printf "\n${ATT} - Executando comando\n" 
 
-        /scripts/whoowns $DOMINIO\n
-        #echo $OWNER
-        /scripts/killdns $DOMINIO\n
-        /scripts/killvhost $DOMINIO\n
-        /scripts/cleandns $DOMINIO\n
-
-        sleep 3
-        printf "\n${OK} - Limpando cache do servidor\n"
-
-        /scripts/updateuserdomains;
-        /scripts/updateuserdatacache;
-        /scripts/update_db_cache;
-        sleep 2
-
+	/scripts/whoowns $DOMINIO\n
+	#echo $OWNER
+	/scripts/killdns $DOMINIO\n
+	/scripts/killvhost $DOMINIO\n
+	/scripts/cleandns $DOMINIO\n
+	
+	sleep 3
+	printf "\n${OK} - Limpando cache do servidor\n" 
+	
+	/scripts/updateuserdomains; 
+	/scripts/updateuserdatacache;
+	/scripts/update_db_cache;
+	sleep 2
+	
 
 }
-                                                                                                                                                                                    43,1-8        60%
+
+
+
+
+
+### Em desenvolvimento ###
+	#/root/bin/ui -d $OWNER
+	
 #if [[! -z ]]
 #then
-        #echo -e "${FAIL} - Dominio Ainda consta nos arquivos. Removendo..."
-        #ui -d | egrep 'Addon: "dominio" |Sub: .teste.com.br'
+       	#echo -e "${FAIL} - Dominio Ainda consta nos arquivos. Removendo..."
+	#ui -d | egrep 'Addon: sinesio.com.br|Sub: peo2015.sinesio.com.br'
+	
+	
+	#Apaga as linhas que contem o dominio informado na variável $DOMINIO
+	#sed -e "/linha/d" $DOMINIO
 
+	#find /etc/localdomains/$DOMINIO -type f -exec sed -i -e '/'$DOMINIO'/d' {} \;
 
-        #Apaga as linhas que contem o dominio informado na variável $DOMINIO
-        #sed -e "/linha/d" $DOMINIO
-
-        #find /etc/localdomains/$DOMINIO -type f -exec sed -i -e '/'$DOMINIO'/d' {} \;
-
-
-        #exit
-        ### Em desenvolvimento - FIM ###
-
-echo -e "Domínio >>> "${verd}$DOMINIO${rese}" <<< removido com SUCESSO!"        
+	
+	#exit
+	### Em desenvolvimento - FIM ###
+	
+echo -e "Domínio >>> "${verd}$DOMINIO${rese}" <<< removido com SUCESSO!"	
 echo -e "Domínio >>> "${FAIL}$OWNER${rese}" <<< Verificando se o domínio foi removido o ADDONS!"
-        /root/bin/ui -d $OWNER
-
+	/root/bin/ui -d $OWNER
+ 
 fi
